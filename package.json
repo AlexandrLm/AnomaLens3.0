@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@mui/lab": "^7.0.0-beta.11",
+    "@mui/x-data-grid": "^8.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3"
+  }
+}

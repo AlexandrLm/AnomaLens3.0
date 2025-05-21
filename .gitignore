@@ -1,0 +1,3 @@
+/.venv
+backend/ml_service/models
+database.db

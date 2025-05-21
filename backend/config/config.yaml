@@ -1,0 +1,75 @@
+# backend/config/config.yaml
+
+common:
+  model_base_path: "backend/ml_service/models" # Путь относительно корня проекта, где запускается uvicorn
+  log_dir: "logs" # Путь относительно корня проекта
+  cors_origins:
+    - "http://localhost:5173"
+    - "http://localhost:3000"
+  environment: "development" 
+
+api:
+  title: "Anomaly Detection API"
+  description: "API для обнаружения аномалий и управления данными электронной коммерции."
+  version: "0.1.1"
+
+ml_service:
+  multilevel_detector_default_config:
+    transaction_level:
+      - type: "transaction_vae"
+        model_filename: "ml_trans_vae_model.joblib"
+        features: ["price", "freight_value", "product_weight_g", "freight_to_price_ratio"]
+        encoding_dim: 10
+        hidden_dim1: 32
+        hidden_dim2: 16
+        epochs: 25
+        kld_weight: 0.5
+        dropout_rate: 0.1
+        shap_background_samples: 50
+      - type: "category_price_outlier"
+        model_filename: "ml_category_price_model.joblib"
+        category_col: "product_category_name"
+        price_col: "price"
+        threshold: 2.8
+        min_samples_per_category: 10
+    transaction_level_combination_method: "weighted_average"
+
+    behavior_level:
+      - type: "graph"
+        model_filename: "ml_graph_model_v3.joblib"
+        use_seller_state_spread: true
+        use_category_diversity: true
+        use_seller_degree: true
+        seller_state_weight: 0.3 # Веса для внутренних метрик графа
+        category_diversity_weight: 0.4
+        seller_degree_weight: 0.3
+      - type: "seller_pricing_behavior"
+        model_filename: "ml_seller_pricing_model.joblib"
+        volatility_threshold: 0.5
+        range_threshold: 5.0
+        freight_ratio_threshold: 1.0
+        min_transactions: 5
+    behavior_level_combination_method: "weighted_average"
+
+    time_series_level:
+      - type: "seasonal_deviation"
+        model_filename: "seasonal_deviation_model.joblib"
+        window_size: 7
+        threshold: 2.5
+      - type: "cumulative_sum"
+        model_filename: "cumulative_sum_model.joblib"
+        window_size: 14
+        threshold: 2.5
+        drift_threshold: 4.5
+    time_series_level_combination_method: "average" 
+
+    combination_weights:
+      transaction: 0.4
+      behavior: 0.3
+      time_series: 0.3
+
+    default_thresholds:
+      transaction_threshold: 0.45
+      behavior_threshold: 0.45
+      time_series_threshold: 0.5
+      final_threshold: 0.4
