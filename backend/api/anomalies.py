@@ -579,11 +579,6 @@ def read_anomaly(anomaly_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Anomaly not found")
     return RootAnomalySchema.model_validate(db_anomaly)
 
-@router.post("/", response_model=RootAnomalySchema, status_code=status.HTTP_201_CREATED, summary="Create Anomaly Manually", tags=["Anomalies Records CRUD"])
-def create_anomaly_endpoint(anomaly_payload: RootAnomalyCreateSchema, db: Session = Depends(get_db)): # Используем корневую схему для создания
-    created_anomaly_model = crud.create_anomaly(db=db, anomaly=anomaly_payload)
-    return RootAnomalySchema.model_validate(created_anomaly_model)
-
 @router.delete("/{anomaly_id}", response_model=RootAnomalySchema, summary="Delete Anomaly by ID", tags=["Anomalies Records CRUD"])
 def delete_anomaly_endpoint(anomaly_id: int, db: Session = Depends(get_db)):
     db_anomaly = crud.delete_anomaly(db, anomaly_id=anomaly_id)

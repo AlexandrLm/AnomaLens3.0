@@ -4,7 +4,6 @@
 
 *   **Базовый URL API**: `/api` (предполагается, что приложение развернуто так, что этот префикс доступен)
 *   **Формат данных**: Все запросы и ответы используют JSON.
-*   **Аутентификация**: В предоставленном коде не указана явная система аутентификации. Если она есть, её детали должны быть добавлены.
 *   **Обработка ошибок**:
     *   `400 Bad Request`: Некорректный запрос (например, невалидные данные).
     *   `401 Unauthorized`: Требуется аутентификация (если применимо).
@@ -136,21 +135,6 @@
               "details": "Optional[Dict[str, Any]]" // Распарсенный JSON из БД
             }
             ```
-
-*   **`POST /api/anomalies/`**
-    *   **Описание**: Создает новую запись об аномалии вручную.
-    *   **Тело Запроса (`RootAnomalyCreateSchema`)**:
-        ```json
-        {
-          "order_item_id": "int",
-          "order_id": "string",
-          "detection_date": "datetime", // (ISO 8601)
-          "anomaly_score": "Optional[float]",
-          "detector_type": "string",
-          "details": "Optional[string]" // JSON-строка или Dict
-        }
-        ```
-    *   **Ответ (`201 Created`)**: `RootAnomalySchema`
 
 *   **`GET /api/anomalies/{anomaly_id}`**
     *   **Описание**: Получает одну аномалию по её ID.
@@ -290,7 +274,7 @@
             ```json
             // Примерная структура GeolocationSchema
             {
-              "id": "int", // Это поле добавлено в schemas.Geolocation, хотя в models.Geolocation его нет как отдельного id (там составной ключ) - уточнить! Вероятно, это автоинкрементный id, если таблица так создана. Если нет, то id не будет. В коде schemas.Geolocation есть "id: int", в models.py - нет.
+              "id": "int",  // Уникальный идентификатор записи геолокации, возвращаемый API.
               "geolocation_zip_code_prefix": "int",
               "geolocation_lat": "float",
               "geolocation_lng": "float",
@@ -298,7 +282,7 @@
               "geolocation_state": "string"
             }
             ```
-            **Примечание по GeolocationSchema**: В `models.py` у `Geolocation` составной первичный ключ, а не `id`. В `schemas.py` `Geolocation` имеет поле `id: int`. Это может быть несоответствием или `id` добавляется как автоинкрементное поле при создании таблицы, не являясь частью PK. Фронтенду следует ожидать `id` в ответе, если он есть в схеме.
+            **Примечание по GeolocationSchema**: Схема ответа API (`schemas.Geolocation`) включает поле `id: int`, которое является уникальным идентификатором для каждой записи геолокации, возвращаемой сервером. Фронтенду следует ожидать это поле. (Внутренняя структура таблицы в базе данных может использовать составной ключ, но API предоставляет этот `id`).
 
 ### 6. Многоуровневая Детекция Аномалий (`/api/multilevel`)
 
@@ -421,7 +405,7 @@
 *   **`GET /api/products/{product_id}`**
     *   **Описание**: Получает продукт по его ID.
     *   **Path Параметры**:
-        *   `product_id: str` (в коде указано `item_id: str`, но для продукта это `product_id`)
+        *   `product_id: str`
     *   **Ответ (`200 OK`)**: `ProductSchema`
     *   **Ответ (`404 Not Found`)**: Если продукт не найден.
 
@@ -447,7 +431,7 @@
 *   **`GET /api/customers/{customer_id}`**
     *   **Описание**: Получает покупателя по его ID.
     *   **Path Параметры**:
-        *   `customer_id: str` (в коде указано `item_id: str`, для покупателя это `customer_id`)
+        *   `customer_id: str`
     *   **Ответ (`200 OK`)**: `CustomerSchema`
     *   **Ответ (`404 Not Found`)**: Если покупатель не найден.
 
@@ -472,7 +456,7 @@
 *   **`GET /api/sellers/{seller_id}`**
     *   **Описание**: Получает продавца по его ID.
     *   **Path Параметры**:
-        *   `seller_id: str` (в коде указано `item_id: str`, для продавца это `seller_id`)
+        *   `seller_id: str`
     *   **Ответ (`200 OK`)**: `SellerSchema`
     *   **Ответ (`404 Not Found`)**: Если продавец не найден.
 
@@ -497,7 +481,7 @@
 *   **`GET /api/reviews/{review_id}`**
     *   **Описание**: Получает отзыв по его ID.
     *   **Path Параметры**:
-        *   `review_id: str` (в коде указано `item_id: str`, для отзыва это `review_id`)
+        *   `review_id: str`
     *   **Ответ (`200 OK`)**: `OrderReviewSchema`
     *   **Ответ (`404 Not Found`)**: Если отзыв не найден.
 
@@ -520,6 +504,6 @@
 *   **`GET /api/translations/{product_category_name}`**
     *   **Описание**: Получает перевод категории по её оригинальному названию.
     *   **Path Параметры**:
-        *   `product_category_name: str` (в коде указано `item_id: str`, для перевода это `product_category_name`)
+        *   `product_category_name: str`c
     *   **Ответ (`200 OK`)**: `ProductCategoryNameTranslationSchema`
     *   **Ответ (`404 Not Found`)**: Если перевод не найден.

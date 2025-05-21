@@ -1,0 +1,152 @@
+2025-05-21 14:07:41,980 - backend.ml_service - INFO - Логирование настроено с уровнем DEBUG
+2025-05-21 14:07:41,980 - backend.ml_service - INFO - Логи записываются в файл: C:\Users\alex\Desktop\AnomaLens3.0\logs\ml_service_2025-05-21.log
+2025-05-21 14:07:44,854 - backend.ml_service.multilevel_service - INFO - Базовый путь для моделей (MultilevelService): C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models
+2025-05-21 14:07:44,854 - backend.ml_service.multilevel_service - INFO - Создание/инициализация многоуровневой системы на основе настроек из config.yaml.
+2025-05-21 14:07:44,855 - backend.ml_service.multilevel_service - DEBUG - Используется следующая конфигурация для MultilevelAnomalyDetector: {
+  "transaction_level": [
+    {
+      "type": "transaction_vae",
+      "model_filename": "ml_trans_vae_model.joblib",
+      "weight": 1.0,
+      "features": [
+        "price",
+        "freight_value",
+        "product_weight_g",
+        "freight_to_price_ratio"
+      ],
+      "encoding_dim": 10,
+      "hidden_dim1": 32,
+      "hidden_dim2": 16,
+      "epochs": 25,
+      "kld_weight": 0.5,
+      "dropout_rate": 0.1,
+      "shap_background_samples": 50
+    },
+    {
+      "type": "category_price_outlier",
+      "model_filename": "ml_category_price_model.joblib",
+      "weight": 1.0,
+      "category_col": "product_category_name",
+      "price_col": "price",
+      "threshold": 2.8,
+      "min_samples_per_category": 10
+    }
+  ],
+  "behavior_level": [
+    {
+      "type": "graph",
+      "model_filename": "ml_graph_model_v3.joblib",
+      "weight": 1.0,
+      "use_seller_state_spread": true,
+      "use_category_diversity": true,
+      "use_seller_degree": true,
+      "seller_state_weight": 0.3,
+      "category_diversity_weight": 0.4,
+      "seller_degree_weight": 0.3
+    },
+    {
+      "type": "seller_pricing_behavior",
+      "model_filename": "ml_seller_pricing_model.joblib",
+      "weight": 1.0,
+      "volatility_threshold": 0.5,
+      "range_threshold": 5.0,
+      "freight_ratio_threshold": 1.0,
+      "min_transactions": 5
+    }
+  ],
+  "time_series_level": [
+    {
+      "type": "seasonal_deviation",
+      "model_filename": "seasonal_deviation_model.joblib",
+      "weight": 1.0,
+      "window_size": 7,
+      "threshold": 2.5
+    },
+    {
+      "type": "cumulative_sum",
+      "model_filename": "cumulative_sum_model.joblib",
+      "weight": 1.0,
+      "window_size": 14,
+      "threshold": 2.5,
+      "drift_threshold": 4.5
+    }
+  ],
+  "combination_weights": {
+    "transaction": 0.4,
+    "behavior": 0.3,
+    "time_series": 0.3
+  },
+  "transaction_level_combination_method": "weighted_average",
+  "behavior_level_combination_method": "weighted_average",
+  "time_series_level_combination_method": "average"
+}
+2025-05-21 14:07:44,856 - backend.ml_service.multilevel_detector - INFO - Инициализация многоуровневой системы обнаружения аномалий...
+2025-05-21 14:07:44,856 - backend.ml_service.multilevel_detector - INFO - Инициализация детекторов для уровня 'transaction'...
+2025-05-21 14:07:44,856 - backend.ml_service.vae_detector - INFO - (transaction_vae_price) VAEDetector инициализирован. Устройство: cpu, Входная размерность: 4, Признаки: ['price', 'freight_value', 'product_weight_g', 'freight_to_price_ratio']
+2025-05-21 14:07:44,857 - backend.ml_service.detector - DEBUG - (transaction_vae_price) Сброс базового состояния детектора (из AnomalyDetector._reset_state).
+2025-05-21 14:07:44,857 - backend.ml_service.vae_detector - INFO - (transaction_vae_price) Специфичное состояние VAEDetector (порог, SHAP) сброшено.
+2025-05-21 14:07:44,857 - backend.ml_service.transaction_detectors - INFO - (transaction_vae_price) TransactionVAEDetector инициализирован. Конфигурационные признаки: ['price', 'freight_value', 'product_weight_g', 'freight_to_price_ratio'], Реально используемые признаки (с генерируемыми): ['price', 'freight_value', 'product_weight_g', 'freight_to_price_ratio'], encoding_dim(latent_dim): 10, hidden_dim1(hidden_dim): 32, hidden_dim2: 16, epochs: 25, batch_size: 64, lr: 0.001, kld_w: 0.5, dropout: 0.1
+2025-05-21 14:07:44,857 - backend.ml_service.detector_factory - INFO - Создан экземпляр детектора transaction_vae_price типа transaction_vae
+2025-05-21 14:07:44,857 - backend.ml_service.detector_factory - DEBUG - Атрибут model_filename='ml_trans_vae_model.joblib' установлен для transaction_vae_price
+2025-05-21 14:07:44,857 - backend.ml_service.detector_factory - DEBUG - Проверка существования файла модели: CWD='C:\Users\alex\Desktop\AnomaLens3.0', Путь='C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_trans_vae_model.joblib'
+2025-05-21 14:07:44,858 - backend.ml_service.detector - INFO - Попытка загрузки модели transaction_vae_price из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_trans_vae_model.joblib...
+2025-05-21 14:07:44,869 - backend.ml_service.vae_detector - INFO - (transaction_vae_price) Загружен порог аномальности: 3.656726
+2025-05-21 14:07:44,869 - backend.ml_service.vae_detector - INFO - (transaction_vae_price) StandardScaler успешно инициализирован с параметрами: n_features_in_=4, mean_=(4,), scale_=(4,)
+2025-05-21 14:07:44,869 - backend.ml_service.vae_detector - INFO - (transaction_vae_price) Фоновые данные SHAP загружены (torch.Size([50, 4]))
+2025-05-21 14:07:44,872 - backend.ml_service.vae_detector - INFO - (transaction_vae_price) Модель VAE успешно загружена и перемещена на cpu.
+2025-05-21 14:07:44,872 - backend.ml_service.vae_detector - INFO - (transaction_vae_price) Попытка пересоздания SHAP GradientExplainer после загрузки...
+2025-05-21 14:07:44,876 - backend.ml_service.vae_detector - INFO - (transaction_vae_price) SHAP GradientExplainer успешно ПЕРЕСОЗДАН при загрузке модели. Device=cpu, background_data.shape=torch.Size([50, 4])
+2025-05-21 14:07:44,877 - backend.ml_service.vae_detector - INFO - (transaction_vae_price) Статус SHAP после загрузки: background_data shape=torch.Size([50, 4]), device=cpu, explainer=создан
+2025-05-21 14:07:44,877 - backend.ml_service.vae_detector - INFO - (transaction_vae_price) Детектор VAE (is_trained=True) успешно загружен.
+2025-05-21 14:07:44,877 - backend.ml_service.detector - INFO - Модель transaction_vae_price успешно обработана при загрузке из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_trans_vae_model.joblib. is_trained=True
+2025-05-21 14:07:44,878 - backend.ml_service.detector_factory - INFO - Успешно загружена модель для детектора transaction_vae_price из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_trans_vae_model.joblib
+2025-05-21 14:07:44,878 - backend.ml_service.multilevel_detector - INFO -   Детектор 'transaction_vae_price' (тип: transaction_vae) попытка создания и загрузки из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_trans_vae_model.joblib.
+2025-05-21 14:07:44,878 - backend.ml_service.multilevel_detector - INFO -   Детектор 'transaction_vae_price' (тип: transaction_vae) инициализирован с весом 1.0.
+2025-05-21 14:07:44,878 - backend.ml_service.transaction_detectors - INFO - CategoryPriceOutlierDetector 'category_price_outlier_model' инициализирован с параметрами: category_col='product_category_name', price_col='price', threshold=2.8, min_samples_per_category=10
+2025-05-21 14:07:44,878 - backend.ml_service.detector_factory - INFO - Создан экземпляр детектора category_price_outlier_model типа category_price_outlier
+2025-05-21 14:07:44,879 - backend.ml_service.detector_factory - DEBUG - Атрибут model_filename='ml_category_price_model.joblib' установлен для category_price_outlier_model
+2025-05-21 14:07:44,879 - backend.ml_service.detector_factory - DEBUG - Проверка существования файла модели: CWD='C:\Users\alex\Desktop\AnomaLens3.0', Путь='C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_category_price_model.joblib'
+2025-05-21 14:07:44,879 - backend.ml_service.detector - INFO - Попытка загрузки модели category_price_outlier_model из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_category_price_model.joblib...
+2025-05-21 14:07:44,881 - backend.ml_service.detector - INFO - Модель category_price_outlier_model успешно обработана при загрузке из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_category_price_model.joblib. is_trained=True
+2025-05-21 14:07:44,881 - backend.ml_service.detector_factory - INFO - Успешно загружена модель для детектора category_price_outlier_model из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_category_price_model.joblib
+2025-05-21 14:07:44,881 - backend.ml_service.multilevel_detector - INFO -   Детектор 'category_price_outlier_model' (тип: category_price_outlier) попытка создания и загрузки из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_category_price_model.joblib.
+2025-05-21 14:07:44,881 - backend.ml_service.multilevel_detector - INFO -   Детектор 'category_price_outlier_model' (тип: category_price_outlier) инициализирован с весом 1.0.
+2025-05-21 14:07:44,882 - backend.ml_service.multilevel_detector - INFO - Инициализация детекторов для уровня 'behavior'...
+2025-05-21 14:07:44,882 - backend.ml_service.detector_factory - INFO - Создан экземпляр детектора graph_graph_analysis типа graph
+2025-05-21 14:07:44,882 - backend.ml_service.detector_factory - DEBUG - Атрибут model_filename='ml_graph_model_v3.joblib' установлен для graph_graph_analysis
+2025-05-21 14:07:44,882 - backend.ml_service.detector_factory - DEBUG - Проверка существования файла модели: CWD='C:\Users\alex\Desktop\AnomaLens3.0', Путь='C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_graph_model_v3.joblib'
+2025-05-21 14:07:44,882 - backend.ml_service.detector - INFO - Попытка загрузки модели graph_graph_analysis из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_graph_model_v3.joblib...
+2025-05-21 14:07:44,883 - backend.ml_service.detector - INFO - Модель graph_graph_analysis успешно обработана при загрузке из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_graph_model_v3.joblib. is_trained=True
+2025-05-21 14:07:44,883 - backend.ml_service.detector_factory - INFO - Успешно загружена модель для детектора graph_graph_analysis из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_graph_model_v3.joblib
+2025-05-21 14:07:44,883 - backend.ml_service.multilevel_detector - INFO -   Детектор 'graph_graph_analysis' (тип: graph) попытка создания и загрузки из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_graph_model_v3.joblib.
+2025-05-21 14:07:44,884 - backend.ml_service.multilevel_detector - INFO -   Детектор 'graph_graph_analysis' (тип: graph) инициализирован с весом 1.0.
+2025-05-21 14:07:44,884 - backend.ml_service.detector_factory - INFO - Создан экземпляр детектора seller_pricing_behavior_model типа seller_pricing_behavior
+2025-05-21 14:07:44,884 - backend.ml_service.detector_factory - DEBUG - Атрибут model_filename='ml_seller_pricing_model.joblib' установлен для seller_pricing_behavior_model
+2025-05-21 14:07:44,884 - backend.ml_service.detector_factory - DEBUG - Проверка существования файла модели: CWD='C:\Users\alex\Desktop\AnomaLens3.0', Путь='C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_seller_pricing_model.joblib'
+2025-05-21 14:07:44,884 - backend.ml_service.detector - INFO - Попытка загрузки модели seller_pricing_behavior_model из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_seller_pricing_model.joblib...
+2025-05-21 14:07:44,885 - backend.ml_service.detector - INFO - Модель seller_pricing_behavior_model успешно обработана при загрузке из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_seller_pricing_model.joblib. is_trained=True
+2025-05-21 14:07:44,885 - backend.ml_service.detector_factory - INFO - Успешно загружена модель для детектора seller_pricing_behavior_model из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_seller_pricing_model.joblib
+2025-05-21 14:07:44,886 - backend.ml_service.multilevel_detector - INFO -   Детектор 'seller_pricing_behavior_model' (тип: seller_pricing_behavior) попытка создания и загрузки из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\ml_seller_pricing_model.joblib.
+2025-05-21 14:07:44,886 - backend.ml_service.multilevel_detector - INFO -   Детектор 'seller_pricing_behavior_model' (тип: seller_pricing_behavior) инициализирован с весом 1.0.
+2025-05-21 14:07:44,886 - backend.ml_service.multilevel_detector - INFO - Инициализация детекторов для уровня 'time_series'...
+2025-05-21 14:07:44,886 - backend.ml_service.detector_factory - INFO - Создан экземпляр детектора seasonal_deviation_model типа seasonal_deviation
+2025-05-21 14:07:44,886 - backend.ml_service.detector_factory - DEBUG - Атрибут model_filename='seasonal_deviation_model.joblib' установлен для seasonal_deviation_model
+2025-05-21 14:07:44,886 - backend.ml_service.detector_factory - DEBUG - Проверка существования файла модели: CWD='C:\Users\alex\Desktop\AnomaLens3.0', Путь='C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\seasonal_deviation_model.joblib'
+2025-05-21 14:07:44,887 - backend.ml_service.detector - INFO - Попытка загрузки модели seasonal_deviation_model из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\seasonal_deviation_model.joblib...
+2025-05-21 14:07:44,887 - backend.ml_service.detector - INFO - Модель seasonal_deviation_model успешно обработана при загрузке из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\seasonal_deviation_model.joblib. is_trained=True
+2025-05-21 14:07:44,887 - backend.ml_service.detector_factory - INFO - Успешно загружена модель для детектора seasonal_deviation_model из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\seasonal_deviation_model.joblib
+2025-05-21 14:07:44,887 - backend.ml_service.multilevel_detector - INFO -   Детектор 'seasonal_deviation_model' (тип: seasonal_deviation) попытка создания и загрузки из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\seasonal_deviation_model.joblib.
+2025-05-21 14:07:44,888 - backend.ml_service.multilevel_detector - INFO -   Детектор 'seasonal_deviation_model' (тип: seasonal_deviation) инициализирован с весом 1.0.
+2025-05-21 14:07:44,888 - backend.ml_service.detector_factory - INFO - Создан экземпляр детектора cumulative_sum_model типа cumulative_sum
+2025-05-21 14:07:44,888 - backend.ml_service.detector_factory - DEBUG - Атрибут model_filename='cumulative_sum_model.joblib' установлен для cumulative_sum_model
+2025-05-21 14:07:44,888 - backend.ml_service.detector_factory - DEBUG - Проверка существования файла модели: CWD='C:\Users\alex\Desktop\AnomaLens3.0', Путь='C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\cumulative_sum_model.joblib'
+2025-05-21 14:07:44,888 - backend.ml_service.detector - INFO - Попытка загрузки модели cumulative_sum_model из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\cumulative_sum_model.joblib...
+2025-05-21 14:07:44,889 - backend.ml_service.time_series_detectors - INFO - (cumulative_sum_model) Загружены baseline_mean=3696.0057142857145, baseline_std=4060.74644512314 из model_state.
+2025-05-21 14:07:44,889 - backend.ml_service.time_series_detectors - INFO - (cumulative_sum_model) Детектор CUSUM успешно загружен и помечен как обученный.
+2025-05-21 14:07:44,889 - backend.ml_service.detector - INFO - Модель cumulative_sum_model успешно обработана при загрузке из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\cumulative_sum_model.joblib. is_trained=True
+2025-05-21 14:07:44,889 - backend.ml_service.detector_factory - INFO - Успешно загружена модель для детектора cumulative_sum_model из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\cumulative_sum_model.joblib
+2025-05-21 14:07:44,889 - backend.ml_service.multilevel_detector - INFO -   Детектор 'cumulative_sum_model' (тип: cumulative_sum) попытка создания и загрузки из C:\Users\alex\Desktop\AnomaLens3.0\backend/ml_service/models\cumulative_sum_model.joblib.
+2025-05-21 14:07:44,890 - backend.ml_service.multilevel_detector - INFO -   Детектор 'cumulative_sum_model' (тип: cumulative_sum) инициализирован с весом 1.0.
+2025-05-21 14:07:44,890 - backend.ml_service.multilevel_detector - INFO - Многоуровневая система инициализирована: 2 транзакционных детекторов (метод: weighted_average), 2 поведенческих детекторов (метод: weighted_average), 2 детекторов временных рядов (метод: average)
+2025-05-21 14:07:44,890 - backend.ml_service.multilevel_service - INFO - Многоуровневая система успешно создана на основе конфигурации из settings.yaml.
+2025-05-21 14:07:44,900 - backend.ml_service - INFO - ML Service Logger активен. Уровень: DEBUG. Директория логов ml_service: C:\Users\alex\Desktop\AnomaLens3.0\logs
